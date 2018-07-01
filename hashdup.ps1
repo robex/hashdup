@@ -15,6 +15,7 @@ $path = $args[0]
 $files = Get-ChildItem -Path $path -Recurse -File
 
 $fileHashes = @()
+$ndup = 0
 
 foreach($file in $files) {
 	$thisFileHash = Get-FileHash -Algorithm md5 -Path $file.FullName
@@ -25,6 +26,7 @@ foreach($file in $files) {
 		$isDuplicate = $false
 		foreach ($fileHash in $fileHashes) {
 			if ($fileHash.Hash -eq $thisFileHash.Hash) {
+				$ndup++
 				$isDuplicate = $true
 				$thisPath = $file.FullName
 				echo "duplicate file: $thisPath"
@@ -40,3 +42,5 @@ foreach($file in $files) {
 		}
 	}
 }
+
+echo "number of duplicate files: $ndup"
