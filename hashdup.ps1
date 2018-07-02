@@ -7,14 +7,28 @@
 #            /robex/ - (C) 2018             #
 #############################################
 
-# USAGE: hashdup [path]
+# USAGE: hashdup [path] [-ri]
+# optional arguments:
+#   -r: recursive
+#   -i: interactive mode: prompt for delete for each file
 
-$path = $args[0]
+param (
+	[Parameter(Mandatory=$true)][string]$path,
+	# recursive
+	[switch]$r = $false,
+	# prompt delete
+	[switch]$i = $false
+)
 
 # remove '-Recurse' if dont want deep searching
-$files = Get-ChildItem -Path $path -Recurse -File
+if ($r) {
+	$files = Get-ChildItem -Path $path -Recurse -File
+} else {
+	$files = Get-ChildItem -Path $path -File
+}
 
 $fileHashes = @()
+$toDelete = @()
 $ndup = 0
 
 foreach($file in $files) {
@@ -32,6 +46,14 @@ foreach($file in $files) {
 				echo "duplicate file: $thisPath"
 				$collidePath = $fileHash.Path
 				echo "duplicate with: $collidePath"
+				if ($i) {
+					$confirmation = Read-Host "Delete file`r`n1: ${thisPath} `r`n2: ${collidePath}`r`n[1/2/n]"
+					if ($confirmation -eq '1') {
+						$toDelete += $thisPath
+					} elseif ($confirmation -eq '2') {
+						$toDelete += $collidePath
+					}
+				}
 				echo ""
 			}
 		}
@@ -43,4 +65,13 @@ foreach($file in $files) {
 	}
 }
 
+if ($i) {
+	$toDelete = $toDelete | select -uniq
+	$arrayLen = @($toDelete).Length
+
+	foreach ($file in $toDelete) {
+		Remove-Item -Path $file
+	}
+	echo "number of deleted files: $arrayLen"
+}
 echo "number of duplicate files: $ndup"
