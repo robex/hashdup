@@ -43,11 +43,14 @@ foreach($file in $files) {
 				$ndup++
 				$isDuplicate = $true
 				$thisPath = $file.FullName
-				echo "duplicate file: $thisPath"
+                $thisPathStr = $thisPath + " | created " + $file.CreationTime + " | size " + $file.Length + " bytes"
+				echo "duplicate file: $thisPathStr"
+                $collideFile = Get-Item $fileHash.Path
 				$collidePath = $fileHash.Path
-				echo "duplicate with: $collidePath"
+                $collidePathStr = $collideFile.FullName + " | created " + $collideFile.CreationTime + " | size " + $collideFile.Length + " bytes"
+				echo "duplicate with: $collidePathStr"
 				if ($i) {
-					$confirmation = Read-Host "Delete file`r`n1: ${thisPath} `r`n2: ${collidePath}`r`n[1/2/n]"
+					$confirmation = Read-Host "Delete file`r`n1: ${thisPathStr} `r`n2: ${collidePathStr}`r`n[1/2/n]"
 					if ($confirmation -eq '1') {
 						$toDelete += $thisPath
 					} elseif ($confirmation -eq '2') {
